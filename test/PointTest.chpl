@@ -1,14 +1,14 @@
 use GeometryLib;
 
 var point: Point = new Point(3);
-if (point.position[1] == 0) {
+if (point[1] == 0) {
     writeln("test passed");
 } else {
     exit(1);
 }
 
 var point1: Point = new Point(1, 2, 3);
-if (point1.position[2] == 2) {
+if (point1[2] == 2) {
     writeln("test passed");
 } else {
     exit(1);
