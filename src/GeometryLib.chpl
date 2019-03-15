@@ -4,27 +4,33 @@ module GeometryLib {
 Point TODO: Add documentation
 */
 class Point {
-  var x, y, z: real;
+  var position;
+  var dim;
 
-  proc init() {
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
+  proc init(dim: int) {
+    var position: [1..dim] real;
+    this.position = position;
+    this.dim = dim;
   }
 
-  proc init(x: real, y: real, z:real) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+  proc init(position: real ...?dim) {
+    this.position = position;
+    this.dim = dim;
   }
 
   /* Returns the distance between point and the origin */
   proc abs() {
-    return distance(this, new Point());
+    return distance(this, new Point(dim));
   }
 
   proc distance(a: Point, b: Point) {
-    var sum = a.x ** b.x + a.y ** b.y + a.z ** b.z;
+    var posa = a.position;
+    var posb = b.position;
+
+    var sum: real;
+    for (i, j) in zip(posa, posb) {
+      sum += (i - j) ** 2; 
+    }
     return sum ** (1/2);
   }
 }
