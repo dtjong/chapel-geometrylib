@@ -4,18 +4,31 @@ module GeometryLib {
 Point TODO: Add documentation
 */
 class Point {
-  var pos;
-  var di;
+  var doma = {1..0};
+  var dim: int;
+  var pos:[doma] real;
 
   proc init(dim: int) {
-    var pos: [1..dim] real;
-    this.pos = pos;
-    this.di = dim;
+    doma = {1..dim};
+    this.dim = dim;
   }
 
   proc init(pos: real ...?dim) {
-    this.pos = pos;
-    this.di = dim;
+    this.doma = {1..dim};
+    this.dim = dim;
+    this.pos = [i in doma] 0;
+    for i in this.doma {
+      this.pos[i] = pos[i];
+    }
+  }
+
+  proc init(point: Point) {
+    this.doma = point.dom();
+    this.dim = point.dimensions();
+    this.pos = [i in doma] 0;
+    for i in this.doma {
+      this.pos[i] = point[i];
+    }
   }
 
   /* Position getter */
@@ -23,24 +36,36 @@ class Point {
     return pos;
   }
 
-  /* Position setter */
-  proc setPosition(pos: real ...?dim) {
-    this.pos = pos;
-    this.di = dim;
+  /* Expands dimensions */ 
+  proc expandDim(dim: int) : bool {
+    if(dim <= this.dimensions()) {
+      return false;
+    }
+    this.dom() = {1..dim};
+    this.dimensions() = dim;
+    return true;
+  }
+
+  /* Domain getter */
+  proc dom() ref {
+    return doma;
   }
 
   /* Dimensions getter */
-  proc dim() ref {
-    return di;
+  proc dimensions() ref {
+    return dim;
   }
 
   /* Returns the distance between point and the origin */
-  proc abs() {
-    return distance(new Point(dim()));
+  proc abs() : real {
+    return distance(new owned Point(this.dimensions()));
   }
 
   /* Returns distance between this point and a given point */
-  proc distance(point: Point) {
+  proc distance(point: Point) : real {
+    if(point.dom() != this.dom()) {
+      normalizeDimensions(this, point);
+    }
     var sum: real;
     for (i, j) in zip(position(), point.position()) {
       sum += (i - j) ** 2; 
@@ -50,51 +75,116 @@ class Point {
 
   /* Adds point to this point */
   proc add(point: Point) {
-    for i in 1..dim() {
+    if(point.dom() != this.dom()) {
+      normalizeDimensions(this, point);
+    }
+    for i in dom() {
       this[i] += point[i];
     }
   }
 
   /* Subtracts point to this point */
   proc sub(point: Point) {
-    for i in 1..dim() {
+    if(point.dom() != this.dom()) {
+      normalizeDimensions(this, point);
+    }
+    for i in dom() {
       this[i] -= point[i];
     }
   }
 
   /* Multiplies point to this point */
-  proc mult(factor: int) {
-    for i in 1..dim() {
+  proc mult(factor: real) {
+    for i in dom() {
       this[i] *= factor;
     }
   }
 
   /* Divides point to this point */
-  proc div(divisor: int) {
-    for i in 1..dim() {
+  proc div(divisor: real) {
+    for i in dom() {
       this[i] /= divisor;
     }
   }
     
   /* Checks if point is equal */
-  proc equals(point: Point) {
-    for i in 1..dim() {
+  proc equals(point: Point) : bool {
+    if(point.dom() != this.dom()) {
+      normalizeDimensions(this, point);
+    }
+    for i in dom() {
       if this[i] != point[i] {
         return false;
       }
     }
     return true;
   }
+    
+  /* Negates the point */
+  proc negate() {
+    for i in dom() {
+      this[i] = -1 * this[i];
+    }
+  }
+
+  /* Takes the dot product */
+  proc dot(point: Point) {
+    if(point.dom() != this.dom()) {
+      normalizeDimensions(this, point);
+    }
+    for i in dom() {
+      this[i] *= point[i];
+    }
+  }
 }
 
-proc Point.this(i: int): real {
+proc Point.this(i: int) ref: real {
   return position()[i];
 }
 
 proc +(a: Point, b: Point) {
-  var sum: Point = new Point(a.dim);
+  var sum: unmanaged Point = new unmanaged Point(max(a.dimensions(), b.dimensions()));
   sum.add(a);
   sum.add(b);
   return sum;
+}
+
+proc -(a: Point, b: Point) {
+  var diff: unmanaged Point = new unmanaged Point(max(a.dimensions(), b.dimensions()));
+  diff.add(a);
+  diff.sub(b);
+  return diff;
+}
+
+proc *(a: Point, b: Point) {
+  var mult: unmanaged Point = new unmanaged Point(max(a.dimensions(), b.dimensions()));
+  mult.add(a);
+  mult.dot(b);
+  return mult;
+}
+
+proc *(a: Point, factor: real) {
+  var mult: unmanaged Point = new unmanaged Point(a.dimensions());
+  mult.add(a);
+  mult.mult(factor);
+  return mult;
+}
+
+proc /(a: Point, divisor: real) {
+  var div: unmanaged Point = new unmanaged Point(a.dimensions());
+  div.add(a);
+  div.div(divisor);
+  return div;
+}
+
+/* Normalizes the dimensions of the points */
+proc normalizeDimensions(points: Point ...?dim) {
+  var maxDim = 0;
+  for i in 1..dim {
+    maxDim = max(maxDim, points[i].dimensions());
+  }
+  for i in 1..dim {
+    points[i].expandDim(maxDim);
+  }
 }
 }
