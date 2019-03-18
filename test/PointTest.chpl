@@ -71,36 +71,58 @@ assert(point[3] == 0);
 }
 
 {
+// Test affine rank dimensions
+var point: Point = new owned Point(2, 2);
+var point1: Point = new owned Point(4, 4);
+var point2: Point = new owned Point(6, 6, 5);
+var rank = affineRank(point, point1, point2);
+assert(rank == 2);
+}
+
+{
+// Test colinear
+var point: Point = new owned Point(2, 3);
+var point1: Point = new owned Point(4, 6);
+var point2: Point = new owned Point(6, 9);
+var point3: Point = new owned Point(6, 8);
+assert(isColinear(point, point1, point2));
+assert(!isColinear(point, point1, point2, point3));
+}
+
+{
+// Test coplanar
+var point: Point = new owned Point(2, 3);
+var point1: Point = new owned Point(4, 6);
+var point2: Point = new owned Point(6, 9);
+var point3: Point = new owned Point(6, 8);
+var point4: Point = new owned Point(6, 8, 1);
+assert(isCoplanar(point, point1, point2));
+assert(isCoplanar(point, point1, point2, point3));
+assert(!isCoplanar(point, point1, point2, point3, point4));
+}
+
+{
 // Test arithmetic functions
 var point: Point = new owned Point(1, 2, 3);
 var point1: Point = new owned Point(3, 2, 3);
 point.add(point1);
 assert(point[1] == 4 && point[2] == 4 && point[3] == 6);
-
 point.sub(point1);
 assert(point[1] == 1 && point[2] == 2 && point[3] == 3);
-
 point.mult(4);
 assert(point[1] == 4 && point[2] == 8 && point[3] == 12);
-
 point.div(2);
 assert(point[1] == 2 && point[2] == 4 && point[3] == 6);
-
 point.negate();
 assert(point[1] == -2 && point[2] == -4 && point[3] == -6);
-
 var point2: Point = point + point1;
 assert(point2[1] == 1 && point2[2] == -2 && point2[3] == -3);
-
 var point3: Point = point - point1;
 assert(point3[1] == -5 && point3[2] == -6 && point3[3] == -9);
-
 var point4: Point = point * point2;
 assert(point4[1] == -2 && point4[2] == 8 && point4[3] == 18);
-
 var point5: Point = point4 / 2;
 assert(point5[1] == -1 && point5[2] == 4 && point5[3] == 9);
-
 var point6: Point = point5 * 3;
 assert(point6[1] == -3 && point6[2] == 12 && point6[3] == 27);
 }

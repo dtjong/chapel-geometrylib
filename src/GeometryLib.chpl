@@ -4,29 +4,25 @@ module GeometryLib {
 Point TODO: Add documentation
 */
 class Point {
-  var doma = {1..0};
-  var dim: int;
-  var pos:[doma] real;
+  var Domain = {1..0};
+  var pos:[Domain] real;
 
   proc init(dim: int) {
-    doma = {1..dim};
-    this.dim = dim;
+    Domain = {1..dim};
   }
 
   proc init(pos: real ...?dim) {
-    this.doma = {1..dim};
-    this.dim = dim;
-    this.pos = [i in doma] 0;
-    for i in this.doma {
+    this.Domain = {1..dim};
+    this.pos = [i in Domain] 0;
+    for i in this.Domain {
       this.pos[i] = pos[i];
     }
   }
 
   proc init(point: Point) {
-    this.doma = point.dom();
-    this.dim = point.dimensions();
-    this.pos = [i in doma] 0;
-    for i in this.doma {
+    this.Domain = point.dom();
+    this.pos = [i in Domain] 0;
+    for i in this.Domain {
       this.pos[i] = point[i];
     }
   }
@@ -42,18 +38,17 @@ class Point {
       return false;
     }
     this.dom() = {1..dim};
-    this.dimensions() = dim;
     return true;
   }
 
   /* Domain getter */
   proc dom() ref {
-    return doma;
+    return Domain;
   }
 
   /* Dimensions getter */
-  proc dimensions() ref {
-    return dim;
+  proc dimensions() {
+    return dom().high;
   }
 
   /* Returns the distance between point and the origin */
@@ -186,5 +181,55 @@ proc normalizeDimensions(points: Point ...?dim) {
   for i in 1..dim {
     points[i].expandDim(maxDim);
   }
+}
+
+/* Calculates the affine rank of a set of points (1 for line, 2 for plane, etc) */
+proc affineRank(points: Point ...?dim) : int {
+  if (dim == 0) {
+    return -1;
+  }
+  var pointCopy: dim*Point;
+  for i in 1..dim {
+    pointCopy[i] = new unmanaged Point(points[i]);
+  }
+  proc matrank(points: Point ...?dim) : int {
+    // Returns the index of the pivot, or -1 if its all 0
+    proc pivot(row: int) : int {
+      for i in 1..points[row].dimensions() {
+        if(points[row][i] != 0) {
+          return i;
+        }
+      }
+      return -1;
+    }
+    var rank : int = 0;
+    for i in 1..dim {
+      var pivotIndex = pivot(i);
+      if(pivotIndex != -1) {
+        rank += 1;
+        // Reducing points below
+        for j in (i+1)..dim {
+          var piv = pivot(j);
+          if(piv != -1) {
+            var ratio = points[i][pivotIndex]/points[j][piv];
+            points[j].mult(ratio);
+            points[j].sub(points[i]);
+          }
+        }
+      } 
+    }
+    rank = max(rank, 1);
+    return rank;
+  }
+  normalizeDimensions((...pointCopy));
+  return matrank((...pointCopy));
+}
+
+proc isColinear(points: Point ...?dim) : bool {
+  return affineRank((...points)) <= 1;
+}
+
+proc isCoplanar(points: Point ...?dim) : bool {
+  return affineRank((...points)) <= 2;
 }
 }
