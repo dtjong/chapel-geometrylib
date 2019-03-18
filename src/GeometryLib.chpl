@@ -141,6 +141,20 @@ class Point {
       this[i] *= point[i];
     }
   }
+
+  /* Returns the closest point, or the point if none exists */
+  proc closest(points: Point ?...dim) : Point {
+    var minDistance = max(real);
+    var closest: Point = this;
+    for i in dim {
+      var distance = this.distance(points[i]);
+      if(distance <= minDistance) {
+        minDistance = distance;
+        closest = points[i];
+      }
+    }
+    return closest;
+  }
 }
 
 /* Allows array-like access for points */
