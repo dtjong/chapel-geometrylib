@@ -1,16 +1,23 @@
 /* Documentation for GeometryLib */
 module GeometryLib {
 /*
-Point TODO: Add documentation
+Point
+-----------
 */
 class Point {
   var Domain = {1..0};
   var pos:[Domain] real;
 
+  /*
+  Initializes a point with dim dimensions intialized to 0.
+  */
   proc init(dim: int) {
     Domain = {1..dim};
   }
 
+  /*
+  Initializes a point at the given location
+  */
   proc init(pos: real ...?dim) {
     this.Domain = {1..dim};
     this.pos = [i in Domain] 0;
@@ -19,6 +26,9 @@ class Point {
     }
   }
 
+  /*
+  Initializes a point as a copy of a point.
+  */
   proc init(point: Point) {
     this.Domain = point.dom();
     this.pos = [i in Domain] 0;
@@ -32,7 +42,7 @@ class Point {
     return pos;
   }
 
-  /* Expands dimensions */ 
+  /* Expands dimensions to dim, or do nothing if point is bigger */ 
   proc expandDim(dim: int) : bool {
     if(dim <= this.dimensions()) {
       return false;
@@ -133,10 +143,12 @@ class Point {
   }
 }
 
+/* Allows array-like access for points */
 proc Point.this(i: int) ref: real {
   return position()[i];
 }
 
+/* Addition operator */
 proc +(a: Point, b: Point) {
   var sum: unmanaged Point = new unmanaged Point(max(a.dimensions(), b.dimensions()));
   sum.add(a);
@@ -144,6 +156,7 @@ proc +(a: Point, b: Point) {
   return sum;
 }
 
+/* Subtraction operator */
 proc -(a: Point, b: Point) {
   var diff: unmanaged Point = new unmanaged Point(max(a.dimensions(), b.dimensions()));
   diff.add(a);
@@ -151,6 +164,7 @@ proc -(a: Point, b: Point) {
   return diff;
 }
 
+/* Dot product operator */
 proc *(a: Point, b: Point) {
   var mult: unmanaged Point = new unmanaged Point(max(a.dimensions(), b.dimensions()));
   mult.add(a);
@@ -158,6 +172,7 @@ proc *(a: Point, b: Point) {
   return mult;
 }
 
+/* Scalar product operator */
 proc *(a: Point, factor: real) {
   var mult: unmanaged Point = new unmanaged Point(a.dimensions());
   mult.add(a);
@@ -165,6 +180,7 @@ proc *(a: Point, factor: real) {
   return mult;
 }
 
+/* Scalar division operator */
 proc /(a: Point, divisor: real) {
   var div: unmanaged Point = new unmanaged Point(a.dimensions());
   div.add(a);
@@ -172,7 +188,7 @@ proc /(a: Point, divisor: real) {
   return div;
 }
 
-/* Normalizes the dimensions of the points */
+/* Normalizes the dimensions of the points, expanding all dimensions to the max */
 proc normalizeDimensions(points: Point ...?dim) {
   var maxDim = 0;
   for i in 1..dim {
@@ -225,10 +241,12 @@ proc affineRank(points: Point ...?dim) : int {
   return matrank((...pointCopy));
 }
 
+/* Calculates if given points are colinear */
 proc isColinear(points: Point ...?dim) : bool {
   return affineRank((...points)) <= 1;
 }
 
+/* Calculates if given points are coplanar */
 proc isCoplanar(points: Point ...?dim) : bool {
   return affineRank((...points)) <= 2;
 }
