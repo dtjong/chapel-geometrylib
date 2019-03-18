@@ -28,7 +28,7 @@ assert(copyPoint[2] == 2);
 {
 // Test absolute value
 var point: Point = new owned Point(1, 2, 3);
-assert(point.abs() == 14 ** (1/2));
+assert(point.abs() == 14 ** (1/2 : real));
 }
 
 {
@@ -99,6 +99,22 @@ var point4: Point = new owned Point(6, 8, 1);
 assert(isCoplanar(point, point1, point2));
 assert(isCoplanar(point, point1, point2, point3));
 assert(!isCoplanar(point, point1, point2, point3, point4));
+}
+
+{
+// Test closest
+var point: Point = new owned Point(2, 3);
+var point1: Point = new owned Point(4, 6);
+var point2: Point = new owned Point(6, 10);
+assert(point1.closest(point, point2).equals(point));
+}
+
+{
+// Test Point2D
+var point: Point = new owned Point2D(2, 3);
+var point1: Point2D = new owned Point2D(4, 6);
+var point2: Point2D = new owned Point2D(6, 10);
+assert(point1.closest(point, point2).equals(point));
 }
 
 {

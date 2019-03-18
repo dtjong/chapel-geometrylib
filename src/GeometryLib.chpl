@@ -75,7 +75,7 @@ class Point {
     for (i, j) in zip(position(), point.position()) {
       sum += (i - j) ** 2; 
     }
-    return sum ** (1/2);
+    return sum ** (1/2 : real);
   }
 
   /* Adds point to this point */
@@ -143,17 +143,29 @@ class Point {
   }
 
   /* Returns the closest point, or the point if none exists */
-  proc closest(points: Point ?...dim) : Point {
+  proc closest(points: Point ...?dim) : Point {
     var minDistance = max(real);
     var closest: Point = this;
-    for i in dim {
+    for i in 1..dim {
       var distance = this.distance(points[i]);
       if(distance <= minDistance) {
         minDistance = distance;
-        closest = points[i];
+        closest = new unmanaged Point(points[i]);
       }
     }
     return closest;
+  }
+}
+
+class Point2D: Point {
+  proc init(x: real, y: real) {
+    super.init(x, y);
+  }
+}
+
+class Point3D: Point {
+  proc init(x: real, y: real, z: real) {
+    super.init(x, y, z);
   }
 }
 
