@@ -28,7 +28,14 @@ assert(copyPoint[2] == 2);
 {
 // Test absolute value
 var point: Point = new owned Point(1, 2, 3);
-assert(point.abs() == 14 ** (1/2 : real));
+assert(point.magnitude() == 14 ** (1/2 : real));
+}
+
+{
+// Test manhattan distance
+var point: Point = new owned Point(1, 2, 3);
+var point1: Point = new owned Point(-1, 2, 10);
+assert(point.manhattanDistance(point1) == 9);
 }
 
 {
