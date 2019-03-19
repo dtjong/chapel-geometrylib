@@ -57,7 +57,8 @@ assert(point[1] == -2 && point[2] == -4 && point[3] == -6);
 var point: Point = new owned Point(1, 2, 3);
 var point1: Point = new owned Point(1, 2, 3);
 point.dot(point1);
-assert(point[1] == 1 && point[2] == 4 && point[3] == 9);
+assert(point.dot(point1) == 14);
+assert(point * point1 == 14);
 }
 
 {
@@ -142,7 +143,10 @@ var point2: Point = point + point1;
 assert(point2[1] == 1 && point2[2] == -2 && point2[3] == -3);
 var point3: Point = point - point1;
 assert(point3[1] == -5 && point3[2] == -6 && point3[3] == -9);
-var point4: Point = point * point2;
+var point4: Point = new owned Point(point);
+point4[1] *= point2[1];
+point4[2] *= point2[2];
+point4[3] *= point2[3];
 assert(point4[1] == -2 && point4[2] == 8 && point4[3] == 18);
 var point5: Point = point4 / 2;
 assert(point5[1] == -1 && point5[2] == 4 && point5[3] == 9);

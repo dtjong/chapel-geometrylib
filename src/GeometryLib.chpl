@@ -1,15 +1,14 @@
 /* Documentation for GeometryLib */
 module GeometryLib {
 
-class GeoObj {}
-
 /*
 Point
 -----------
 */
-class Point : GeoObj {
+class Point {
   var Domain = {1..0};
   var pos:[Domain] real;
+  var isVec: bool;
 
   /*
   Initializes a point with dim dimensions intialized to 0.
@@ -148,13 +147,15 @@ class Point : GeoObj {
   }
 
   /* Takes the dot product */
-  proc dot(point: Point) {
+  proc dot(point: Point) : real {
     if(point.dom() != this.dom()) {
       normalizeDimensions(this, point);
     }
+    var sum : real = 0;
     for i in dom() {
-      this[i] *= point[i];
+      sum += this[i] * point[i];
     }
+    return sum;
   }
 
   /* Returns the closest point, or the point if none exists */
@@ -184,12 +185,6 @@ class Point3D: Point {
   }
 }
 
-class Vector: Point {
-  proc init(points: real ...?dim) {
-    super.init((...points));
-  }
-}
-
 /* Allows array-like access for points */
 proc Point.this(i: int) ref: real {
   return position()[i];
@@ -213,10 +208,7 @@ proc -(a: Point, b: Point) {
 
 /* Dot product operator */
 proc *(a: Point, b: Point) {
-  var mult: unmanaged Point = new unmanaged Point(max(a.dimensions(), b.dimensions()));
-  mult.add(a);
-  mult.dot(b);
-  return mult;
+  return a.dot(b);
 }
 
 /* Scalar product operator */
@@ -247,24 +239,32 @@ proc normalizeDimensions(points: Point ...?dim) {
 }
 
 /* "Static" functions */
-proc add(point1: Point, point2: Point) {
-  point1.add(point2);
+proc add(point1: Point, point2: Point) : Point {
+  var result: Point = new unmanaged Point(point1);
+  result.add(point2);
+  return result;
 }
 
-proc sub(point1: Point, point2: Point) {
-  point1.sub(point2);
+proc sub(point1: Point, point2: Point) : Point {
+  var result: Point = new unmanaged Point(point1);
+  result.sub(point2);
+  return result;
 }
 
-proc mult(point: Point, factor: real) {
-  point.mult(factor);
+proc mult(point: Point, factor: real) : Point {
+  var result: Point = new unmanaged Point(point);
+  result.mult(factor);
+  return result;
 }
 
-proc div(point: Point, divisor: real) {
-  point.div(divisor);
+proc div(point: Point, divisor: real) : Point {
+  var result: Point = new unmanaged Point(point);
+  result.div(divisor);
+  return result;
 }
 
-proc dot(point1: Point, point2: Point) {
-  point1.dot(point2);
+proc dot(point1: Point, point2: Point) : real {
+  return point1.dot(point2);
 }
 
 /* Calculates the affine rank of a set of points (1 for line, 2 for plane, etc) */
@@ -323,24 +323,21 @@ proc isCoplanar(points: Point ...?dim) : bool {
 Line
 -----------
 */
-class Line : GeoObj {
+class Line {
   var st: Point;
   var en: Point;
 
   /* Construct line from two points */
-  proc init(start: Point, end: Point) {
+  proc init(start: Point, end: Point = nil, direction: Point = nil) {
     normalizeDimensions(start, end);
     this.st = start; 
-    this.en = end; 
-  }
-
-  /* Construct line from point and vector */
-  proc init(start: Point, vec: Vector) {
-    normalizeDimensions(start, vec);
-    this.st = start; 
-    var end = new unmanaged Point(start);
-    end.add(vec);
-    this.en = end;
+    if(direction == nil) {
+      this.en = end; 
+    } else {
+      var end = new unmanaged Point(start);
+      end.add(direction);
+      this.en = end;
+    }
   }
 
   /* Getter and setter for start */
@@ -361,29 +358,33 @@ class Line : GeoObj {
   Returns true if the point is on the line, pass in true for unbounded for ray 
   calculations.
   */
-  proc containsPoint(obj: GeoObj) : bool {
-    // Save for subclasses
-    // if(isColinear(point, start(), end())) {
-    //   if(!unbounded) {
-    //     if(point[1] >= end()[1] && point[1] <= start()[1]) {
-    //       return true;
-    //     } else if(point[1] <= end()[1] && point[1] >= start()[1]) {
-    //       return true;
-    //     }
-    //   } else {
-    //     if(end()[1] > start()[1] && point[1] >= start()[1]) {
-    //       return true;
-    //     } else if(end()[1] < start()[1] && point[1] <= start()[1]) {
-    //       return true;
-    //     }
-    //   }
-    // }
+  proc contains(point: Point) : bool {
+    return isColinear(point: Point, start(), end());
+  }
 
-    // TODO: Figure out type checking in this forsaken language
-    // if(obj.type == Point) {
-      return isColinear(obj: Point, start(), end());
-    // }
-    return false;
+  /*
+  Returns the direction of the line
+  */
+  proc direction() : Point {
+    return end() - start();
+  }
+
+  /* Finds the angle between two lines */
+  proc angle(line: Line) : real {
+    var d1 = this.direction();
+    var d2 = line.direction();
+    return acos((d1*d2)/(d1.magnitude()*d2.magnitude()));
+  }
+
+  /* Returns true if the lines are parallel */
+  proc isParallel(line: Line) : bool {
+    var angle: real = this.angle(line);
+    return angle == 0 || angle == pi;
+  }
+
+  /* Returns true if the lines are perpendicular */
+  proc isPerpendicular(line: Line) : bool {
+    return this.direction().dot(line.direction()) == 0;
   }
 }
 }
