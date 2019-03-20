@@ -361,11 +361,12 @@ class Line {
 
   /* Construct line from two points */
   proc init(start: Point, end: Point = nil, direction: Point = nil) {
-    normalizeDimensions(start, end);
     this.st = start; 
     if(direction == nil) {
+      normalizeDimensions(start, end);
       this.en = end; 
     } else {
+      normalizeDimensions(start, direction);
       var end = new unmanaged Point(start);
       end.add(direction);
       this.en = end;
@@ -412,7 +413,7 @@ class Line {
   /* Returns true if the lines are parallel */
   proc isParallel(line: Line) : bool {
     var angle: real = this.angle(line);
-    return equals(angle, 0) || equals(angle, pi);
+    return realeq(angle, 0) || realeq(angle, pi);
   }
 
   /* Returns true if the lines are perpendicular */
@@ -435,6 +436,11 @@ class Line {
   /* Returns the points */
   proc points() {
     return (start(), end());
+  }
+
+  /* Returns true if this line is equal */
+  proc equals(line: Line) : bool {
+    return isColinear(start(), end(), line.start(), line.end());
   }
 }
 
@@ -463,10 +469,45 @@ class LineSegment : Line {
     }
     return isColinear(point: Point, start(), end());
   }
+
+  /* Returns true if this line segment is equal */
+  override proc equals(line: Line) : bool {
+    return (start().equals(line.start()) && end().equals(line.end())) ||
+          (start().equals(line.end()) && end().equals(line.start()));
+  }
+}
+
+class Ray: Line {
+  proc init(start: Point, end: Point = nil, direction: Point = nil) {
+    super.init(start, end, direction);
+  }
+
+  override proc length() : real {
+    return INFINITY;
+  }
+
+  override proc contains(point: Point) : bool {
+    var nonzero: int = 1;
+    for i in 1..point.dimensions() {
+      if(point[i] != 0) {
+        nonzero = i;
+        break;
+      }
+    }
+    if(point[nonzero] < start()[nonzero] && point[nonzero] < end()[nonzero]) {
+      return false;
+    }
+    return isColinear(point: Point, start(), end());
+  }
+
+  /* Returns true if this line segment is equal */
+  override proc equals(line: Line) : bool {
+    return isColinear(start(), end(), line.start(), line.end()) && start().equals(line.start());
+  }
 }
 
 /* Equality checking for floating point values. Is there a better way in chapel? */
-proc equals(a: real, b: real) : bool {
+proc realeq(a: real, b: real) : bool {
   return abs(a - b) < TOLERANCE;
 }
 }

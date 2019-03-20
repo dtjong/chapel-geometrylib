@@ -85,6 +85,17 @@ assert(line.points()[1][1] == 0);
 }
 
 {
+// Test line equals
+var point: Point2D = new owned Point2D(0, 0);
+var point1: Point2D = new owned Point2D(1, 1);
+var point2: Point2D = new owned Point2D(2, 2);
+var point3: Point2D = new owned Point2D(3, 3);
+var line: Line = new owned Line(point, point1);
+var line1: Line = new owned Line(point2, point3);
+assert(line.equals(line1));
+}
+
+{
 // Testing line segment length
 var point: Point2D = new owned Point2D(0, 0);
 var point1: Point2D = new owned Point2D(3, 4);
@@ -101,4 +112,29 @@ var point3: Point2D = new owned Point2D(0, 5);
 var line: LineSegment = new owned LineSegment(point, point1);
 assert(line.contains(point2));
 assert(!line.contains(point3));
+}
+
+{
+var point: Point2D = new owned Point2D(0, 0);
+var point1: Point2D = new owned Point2D(1, 1);
+var point2: Point2D = new owned Point2D(0, 0);
+var point3: Point2D = new owned Point2D(1, 1);
+var point4: Point2D = new owned Point2D(2, 2);
+var line: LineSegment = new owned LineSegment(point, point1);
+var line1: LineSegment = new owned LineSegment(point2, point3);
+var line2: LineSegment = new owned LineSegment(point2, point4);
+assert(line.equals(line1));
+assert(!line.equals(line2));
+}
+
+{
+var point: Point2D = new owned Point2D(0, 0);
+var point1: Point2D = new owned Point2D(1, 1);
+var point2: Point2D = new owned Point2D(0, 0);
+var point4: Point2D = new owned Point2D(2, 2);
+var line: Ray = new owned Ray(point, direction = point1);
+var line1: Ray = new owned Ray(point2, direction = point4);
+var line2: Ray = new owned Ray(point4, direction = point1);
+assert(line.equals(line1));
+assert(!line.equals(line2));
 }
