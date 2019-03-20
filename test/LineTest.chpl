@@ -21,10 +21,10 @@ assert(line1.end().equals(new owned Point(7, 9)));
 
 // line length test
 {
-var point1: Point2D = new owned Point2D(3, 6);
+var point1: Point2D = new owned Point2D(2, 5);
 var point2: Point2D = new owned Point2D(6, 10);
 var line: Line = new owned Line(point1, point2);
-assert(line.length() == 5);
+assert(line.length() == INFINITY);
 }
 
 // line contains point test
@@ -66,4 +66,39 @@ assert(!line2.isParallel(line));
 // Testing perpendicular
 assert(line2.isPerpendicular(line4));
 assert(!line2.isPerpendicular(line3));
+}
+
+{
+var point: Point2D = new owned Point2D(0, 0);
+var point1: Point2D = new owned Point2D(1, 1);
+var point2: Point2D = new owned Point2D(2, 0);
+var line: Line = new owned Line(point, point1);
+assert(line.parallelLine(point2).isParallel(line));
+assert(line.perpendicularLine(point2).isPerpendicular(line));
+}
+
+{
+var point: Point2D = new owned Point2D(0, 0);
+var point1: Point2D = new owned Point2D(1, 1);
+var line: Line = new owned Line(point, point1);
+assert(line.points()[1][1] == 0);
+}
+
+{
+// Testing line segment length
+var point: Point2D = new owned Point2D(0, 0);
+var point1: Point2D = new owned Point2D(3, 4);
+var line: LineSegment = new owned LineSegment(point, point1);
+assert(line.length() == 5);
+}
+
+{
+// Testing line segment length
+var point: Point2D = new owned Point2D(0, 0);
+var point1: Point2D = new owned Point2D(0, 4);
+var point2: Point2D = new owned Point2D(0, 3);
+var point3: Point2D = new owned Point2D(0, 5);
+var line: LineSegment = new owned LineSegment(point, point1);
+assert(line.contains(point2));
+assert(!line.contains(point3));
 }

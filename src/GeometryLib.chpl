@@ -1,6 +1,8 @@
 /* Documentation for GeometryLib */
 module GeometryLib {
 
+var TOLERANCE : real = .0000001;
+
 /*
 Point
 -----------
@@ -59,7 +61,7 @@ class Point {
   }
 
   /* Dimensions getter */
-  proc dimensions() {
+  proc dimensions() : int {
     return dom().high;
   }
 
@@ -171,17 +173,47 @@ class Point {
     }
     return closest;
   }
+
+  /* Returns a point that is an orthogonal question */
+  proc orthogonalDirection() : Point {
+    var orth: Point = new unmanaged Point(dimensions());
+    if(this[1] == 0) {
+      orth[1] = 1;
+    } else if(this[2] == 0) {
+      orth[2] = 1;
+    } else {
+      orth[1] = -orth[2];
+      orth[2] = orth[1];
+    }
+    return orth;
+  }
 }
 
 class Point2D: Point {
   proc init(x: real, y: real) {
     super.init(x, y);
   }
+
+  proc init() {
+    super.init(2);
+  }
+
+  proc init(point: Point2D) {
+    super.init(point);
+  }
 }
 
 class Point3D: Point {
   proc init(x: real, y: real, z: real) {
     super.init(x, y, z);
+  }
+
+  proc init() {
+    super.init(3);
+  }
+
+  proc init(point: Point3D) {
+    super.init(point);
   }
 }
 
@@ -350,8 +382,9 @@ class Line {
     return this.en;
   }
 
+  /* Returns the length of the line */
   proc length() : real {
-    return start().distance(end());
+    return INFINITY;
   }
 
   /* 
@@ -379,12 +412,61 @@ class Line {
   /* Returns true if the lines are parallel */
   proc isParallel(line: Line) : bool {
     var angle: real = this.angle(line);
-    return angle == 0 || angle == pi;
+    return equals(angle, 0) || equals(angle, pi);
   }
 
   /* Returns true if the lines are perpendicular */
   proc isPerpendicular(line: Line) : bool {
     return this.direction().dot(line.direction()) == 0;
   }
+
+  /* Creates parallel line to this that passes through given point */
+  proc parallelLine(point: Point) : Line {
+    var end: Point = point + direction();
+    return new unmanaged Line(point, end);
+  }
+
+  /* Creates perpendicular line to this that passes through given point */
+  proc perpendicularLine(point: Point) : Line {
+    var end: Point = point + direction().orthogonalDirection();
+    return new unmanaged Line(point, end);
+  }
+
+  /* Returns the points */
+  proc points() {
+    return (start(), end());
+  }
+}
+
+class LineSegment : Line {
+  proc init(start: Point, end: Point = nil, direction: Point = nil) {
+    super.init(start, end, direction);
+  }
+
+  override proc length() : real {
+    return abs((start() - end()).magnitude());
+  }
+
+  override proc contains(point: Point) : bool {
+    var nonzero: int = 1;
+    for i in 1..point.dimensions() {
+      if(point[i] != 0) {
+        nonzero = i;
+        break;
+      }
+    }
+    if(point[nonzero] > start()[nonzero] && point[nonzero] > end()[nonzero]) {
+      return false;
+    }
+    if(point[nonzero] < start()[nonzero] && point[nonzero] < end()[nonzero]) {
+      return false;
+    }
+    return isColinear(point: Point, start(), end());
+  }
+}
+
+/* Equality checking for floating point values. Is there a better way in chapel? */
+proc equals(a: real, b: real) : bool {
+  return abs(a - b) < TOLERANCE;
 }
 }
