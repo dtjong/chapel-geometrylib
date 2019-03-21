@@ -201,6 +201,14 @@ class Point2D: Point {
   proc init(point: Point2D) {
     super.init(point);
   }
+
+  proc x() ref: real {
+    return this[1];
+  }
+
+  proc y() ref: real {
+    return this[2];
+  }
 }
 
 class Point3D: Point {
@@ -214,6 +222,18 @@ class Point3D: Point {
 
   proc init(point: Point3D) {
     super.init(point);
+  }
+
+  proc x() ref: real {
+    return this[1];
+  }
+
+  proc y() ref: real {
+    return this[2];
+  }
+
+  proc z() ref: real {
+    return this[3];
   }
 }
 
@@ -299,6 +319,16 @@ proc dot(point1: Point, point2: Point) : real {
   return point1.dot(point2);
 }
 
+/* Calculates the midpoint of the two given points */
+proc midpoint(point1: Point, point2: Point) : Point {
+  normalizeDimensions(point1, point2);
+  var midpoint: Point = new unmanaged Point(point1.dimensions());
+  for i in 1..point1.dimensions() {
+    midpoint[i] = (point1[i] + point2[i]) / 2;
+  }
+  return midpoint;
+}
+
 /* Calculates the affine rank of a set of points (1 for line, 2 for plane, etc) */
 proc affineRank(points: Point ...?dim) : int {
   if (dim == 0) {
@@ -361,15 +391,15 @@ class Line {
 
   /* Construct line from two points */
   proc init(start: Point, end: Point = nil, direction: Point = nil) {
-    this.st = start; 
+    this.st = new unmanaged Point(start); 
     if(direction == nil) {
       normalizeDimensions(start, end);
-      this.en = end; 
+      this.en = new unmanaged Point(end); 
     } else {
       normalizeDimensions(start, direction);
       var end = new unmanaged Point(start);
       end.add(direction);
-      this.en = end;
+      this.en = new unmanaged Point(end);
     }
   }
 
@@ -475,15 +505,21 @@ class LineSegment : Line {
     return (start().equals(line.start()) && end().equals(line.end())) ||
           (start().equals(line.end()) && end().equals(line.start()));
   }
+
+  /* Returns the midpoint of the line */
+  proc midpoint() : Point {
+    return GeometryLib.midpoint(start(), end());
+  }
+
+  /* Returns a perpendicular bisector */
+  proc perpendicularBisector() : Line {
+    return perpendicularLine(midpoint());
+  }
 }
 
 class Ray: Line {
   proc init(start: Point, end: Point = nil, direction: Point = nil) {
     super.init(start, end, direction);
-  }
-
-  override proc length() : real {
-    return INFINITY;
   }
 
   override proc contains(point: Point) : bool {
@@ -503,6 +539,62 @@ class Ray: Line {
   /* Returns true if this line segment is equal */
   override proc equals(line: Line) : bool {
     return isColinear(start(), end(), line.start(), line.end()) && start().equals(line.start());
+  }
+
+  /* Returns the source of the array (Same as start()) */
+  proc source() ref {
+    return start();
+  }
+}
+
+class Line2D : Line {
+  proc init(start: Point2D, end: Point2D = nil, direction: Point2D = nil) {
+    super.init(start, end, direction);
+  }
+
+  /* Point - slope form */
+  proc init(start: Point2D, slope: real) {
+    if(slope == INFINITY) {
+      super.init(start, new unmanaged Point(start.x(), start.y() + 1));
+    }
+    super.init(start, new unmanaged Point(start.x() + 1, slope));
+  }
+
+  proc slope() : real {
+    if(start()[1] == end()[1]) {
+      return INFINITY;
+    }
+    return (start()[2] - end()[2]) / (start()[1] - end()[1]);
+  }
+}
+
+class Ray2D : Ray {
+  proc init(start: Point2D, end: Point2D = nil, direction: Point2D = nil) {
+    super.init(start, end, direction);
+  }
+}
+
+class LineSegment2D : LineSegment {
+  proc init(start: Point2D, end: Point2D = nil, direction: Point2D = nil) {
+    super.init(start, end, direction);
+  }
+}
+
+class Line3D : Line {
+  proc init(start: Point3D, end: Point3D = nil, direction: Point3D = nil) {
+    super.init(start, end, direction);
+  }
+}
+
+class Ray3D : Line {
+  proc init(start: Point3D, end: Point3D = nil, direction: Point3D = nil) {
+    super.init(start, end, direction);
+  }
+}
+
+class LineSegment3D : Line {
+  proc init(start: Point3D, end: Point3D = nil, direction: Point3D = nil) {
+    super.init(start, end, direction);
   }
 }
 

@@ -71,6 +71,14 @@ assert(!point.expandDim(3));
 }
 
 {
+// Test midpoint
+var point: Point = new owned Point(2, 2);
+var point1: Point = new owned Point(4, 6);
+var mid = midpoint(point, point1);
+assert(mid[1] == 3 && mid[2] == 4);
+}
+
+{
 // Test normalize dimensions
 var point: Point = new owned Point(2, 2);
 var point1: Point = new owned Point(4, 2, 0);

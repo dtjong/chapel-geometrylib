@@ -138,3 +138,44 @@ var line2: Ray = new owned Ray(point4, direction = point1);
 assert(line.equals(line1));
 assert(!line.equals(line2));
 }
+
+{
+// Test midpoint
+var point: Point = new owned Point(2, 2);
+var point1: Point = new owned Point(4, 6);
+var lineseg: LineSegment = new owned LineSegment(point, point1);
+var mid = lineseg.midpoint();
+assert(mid[1] == 3 && mid[2] == 4);
+}
+
+{
+// Test perpendicular bisector
+var point: Point = new owned Point(0, 0);
+var point1: Point = new owned Point(6, 6);
+var lineseg: LineSegment = new owned LineSegment(point, point1);
+var bisector: Line = lineseg.perpendicularBisector();
+assert(lineseg.isPerpendicular(bisector));
+assert(bisector.contains(lineseg.midpoint()));
+}
+
+{
+// Line2D constructors
+var point: Point2D = new owned Point2D(0, 0);
+var point1: Point2D = new owned Point2D(6, 6);
+var line: Line2D = new owned Line2D(point, point1);
+var line1: Line2D = new owned Line2D(point, 1);
+assert(line.isParallel(line1));
+var lineseg2D: LineSegment2D = new owned LineSegment2D(point, point1);
+var ray2D: Ray2D = new owned Ray2D(point1, point);
+// Slope
+assert(line.slope() == 1);
+}
+
+{
+// 3D Constructors
+var point1: Point3D = new owned Point3D(6, 6, 6);
+var point2: Point3D = new owned Point3D(0, 0, 9);
+var line3d: Line3D = new owned Line3D(point1, point2);
+var ray3d: Ray3D = new owned Ray3D(point1, point2);
+var seg3d: LineSegment3D = new owned LineSegment3D(point1, point2);
+}
