@@ -403,6 +403,11 @@ class Line {
     }
   }
 
+  proc deinit() {
+    delete start();
+    delete end();
+  }
+
   /* Getter and setter for start */
   proc start() ref {
     return this.st;
@@ -601,5 +606,18 @@ class LineSegment3D : Line {
 /* Equality checking for floating point values. Is there a better way in chapel? */
 proc realeq(a: real, b: real) : bool {
   return abs(a - b) < TOLERANCE;
+}
+
+class Polygon {
+  var Domain = {1..0};
+  var vert:[Domain] Point;
+
+  proc init(vertices: Point ...?dim){
+    this.Domain = {1..dim}; 
+    this.vert = [i in Domain] new unmanaged Point(0);
+    for i in 1..dim {
+      vert[i] = new unmanaged Point(vertices[i]);
+    }
+  }
 }
 }

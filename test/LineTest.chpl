@@ -19,6 +19,14 @@ assert(line1.start().equals(point1));
 assert(line1.end().equals(new owned Point(7, 9)));
 }
 
+{
+// test line deconstructor
+var point1: Point2D = new unmanaged Point2D(4, 6);
+var point2: Point2D = new unmanaged Point2D(6, 10);
+var line: Line = new unmanaged Line(point1, point2);
+delete line;
+}
+
 // line length test
 {
 var point1: Point2D = new owned Point2D(2, 5);
